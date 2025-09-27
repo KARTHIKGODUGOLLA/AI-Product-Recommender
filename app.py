@@ -12,8 +12,12 @@ index = faiss.read_index("product_faiss.index")
 with open("product_metadata.json", "r", encoding="utf-8") as f:
     metadata = json.load(f)
 
-# Set your OpenAI API key
-openai.api_key = "OPENAI_API_KEY"
+api_key = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY"))
+
+if not api_key:
+    st.error("No OpenAI API key found. Please set OPENAI_API_KEY in Streamlit secrets or environment variables.")
+else:
+    openai.api_key = api_key
 
 # Embedding function
 def embed_query(query):
