@@ -1,0 +1,12 @@
+streamlit
+openai
+faiss-cpu
+numpy
+pandas
+requests
+google-search-results
+beautifulsoup4
+lxml
+readability-lxml
+tldextract
+tqdm
