@@ -8,7 +8,7 @@ from openai import OpenAI
 from pathlib import Path
 
 # ✅ Hardcoded OpenAI API key (your request)
-client = OpenAI(api_key="OPENAI_API_KEY")
+client = OpenAI(api_key="OPENAI_API_KEYproj-LncUi5qDYZofB6j_VQOKpdaqr48bFl09qCUD1IU8SRI34f6J4i2MuUS-E22QORoRnJifYgLAfUT3BlbkFJlakB60Cjc8v7tn7e_V9BwnA48DxLyXyTccoM63m4oaV8WrOMNrPZKSDeli9l5Sd8pFK3Zm3FkA")
 
 # Directory containing category folders of JSONL product data
 SCRAPED_RESULTS_DIR = "scraped_results"
@@ -59,19 +59,46 @@ def build_faiss_index():
     embeddings = []
     metadata = []
 
-    print("🧠 Generating embeddings...")
-    for product in tqdm(products):
-        text = f"{product['title']}\n{product['summary']}\n{product['full_text']}"
-        vector = get_embedding(text)
-        if vector:
-            embeddings.append(vector)
-            metadata.append({
-                "title": product["title"],
-                "url": product["url"],
-                "price": product.get("price"),
-                "rating": product.get("rating"),
-                "category": product.get("category")
-            })
+    print("🧠 Generating embeddings in batches...")
+
+    BATCH_SIZE = 100  # tweak to 50–200 depending on your rate limit
+    embeddings = []
+    metadata = []
+
+    batch_texts = []
+    batch_meta = []
+
+    for i, product in enumerate(tqdm(products, desc="Batching")):
+        text = f"{product['title']}\n{product.get('summary', '')}\n{product.get('full_text', '')}"
+        batch_texts.append(text)
+        batch_meta.append({
+            "title": product["title"],
+            "url": product["url"],
+            "price": product.get("price"),
+            "rating": product.get("rating"),
+            "category": product.get("category")
+        })
+
+        # when batch is full or last product reached
+        if len(batch_texts) >= BATCH_SIZE or i == len(products) - 1:
+            try:
+                response = client.embeddings.create(
+                    model="text-embedding-3-small",
+                    input=batch_texts
+                )
+                # store all embeddings + their metadata
+                for j, item in enumerate(response.data):
+                    embeddings.append(item.embedding)
+                    metadata.append(batch_meta[j])
+
+                print(f"✅ Embedded batch {len(embeddings)} total so far")
+            except Exception as e:
+                print(f"❌ Batch failed: {e}")
+
+            # reset for next batch
+            batch_texts.clear()
+            batch_meta.clear()
+
 
     if not embeddings:
         print("❌ No embeddings generated.")
