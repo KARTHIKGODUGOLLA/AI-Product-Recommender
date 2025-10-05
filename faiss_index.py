@@ -8,7 +8,7 @@ from openai import OpenAI
 from pathlib import Path
 
 # ✅ Hardcoded OpenAI API key (your request)
-client = OpenAI(api_key="OPENAI_API_KEYproj-LncUi5qDYZofB6j_VQOKpdaqr48bFl09qCUD1IU8SRI34f6J4i2MuUS-E22QORoRnJifYgLAfUT3BlbkFJlakB60Cjc8v7tn7e_V9BwnA48DxLyXyTccoM63m4oaV8WrOMNrPZKSDeli9l5Sd8pFK3Zm3FkA")
+client = OpenAI(api_key="OPENAI_API_KEY")
 
 # Directory containing category folders of JSONL product data
 SCRAPED_RESULTS_DIR = "scraped_results"
